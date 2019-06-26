@@ -10,14 +10,17 @@ $dmapi = new dmapi("6HsAmP1e0R/EkEYWOcjKg==");
 
 if (isset($_POST['bid'])) {
     $bid = $_POST['bid'];
-    if (strlen($bid) == 5) {
+    $len = strlen($bid);
+    $bid = strtoupper($bid);
+
+    if (preg_match("/[^A-Z0-9]+/", $bid) || $len <= 0 || $len > 5) {
+        echo('<div class="alert alert-danger"><strong>Error!</strong> Invalid bus stop or route number.</div>');
+    } else if ($len == 5 && !preg_match("/[^0-9]+/", $bid)) {
         // input is a bus stop number
         bus_arrival($dmapi, $bid);
-    } else if (strlen($bid) <= 3 || strlen($bid) == 4 && ctype_alpha($bid[strlen($bid) - 1])) {
+    } else {
         // input is a bus service number
         bus_route($dmapi, $bid);
-    } else {
-        echo('<div class="alert alert-danger"><strong>Error!</strong> Invalid bus stop or route number.</div>');
     }
 }
 
