@@ -19,3 +19,5 @@ You should use the API account key provided to you (see more at [DataMall](https
 ```
 $dmapi = new dmapi("<Your API account key here>");
 ```
+
+Remember to populate the bus stops database by running the `scripts/updatestops.php` script. You are recommended to set up a cron job that runs the script at least once a day to ensure the database is kept up-to-date.
