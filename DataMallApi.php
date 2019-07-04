@@ -43,7 +43,7 @@ class dmapi {
     * @return array
     */
     public function getBusArrAttrs($id, $sort = false) {
-        $cachefile = "./cache/id-" . $id . ".json";
+        $cachefile = __DIR__ . "/cache/id-" . $id . ".json";
         $diff = file_exists($cachefile) ? time() - filemtime($cachefile) : -1;
         //echo("time difference".$diff."<br>");
 
@@ -71,7 +71,7 @@ class dmapi {
     * Populate and update all bus stop attributes in cache
     */
     public function updateBusStopAttrs() {
-        $cachefile = "./cache/bus_stops.json";
+        $cachefile = __DIR__ . "/cache/bus_stops.json";
         // Combine all the json files together
             $response = $this->curl_query($this->query_url . "BusStops");
             $stopsArr = json_decode($response, true);
@@ -97,13 +97,13 @@ class dmapi {
     * @return array
     */
     public function getBusStopAttrs() {
-        $cachefile = "./cache/bus_stops.json";
+        $cachefile = __DIR__ . "/cache/bus_stops.json";
         $data = file_get_contents($cachefile);
         return json_decode($data, true);
     }
 
     public function updateBusRouteAttrs() {
-        $cachefile = "./cache/bus_routes.json";
+        $cachefile = __DIR__ . "/cache/bus_routes.json";
         // Combine all the json files together
         $response = $this->curl_query($this->query_url . "BusRoutes");
         $stopsArr = json_decode($response, true);
@@ -124,7 +124,7 @@ class dmapi {
     }
 
     public function getBusRouteAttrs() {
-        $cachefile = "./cache/bus_routes.json";
+        $cachefile = __DIR__ . "/cache/bus_routes.json";
         $data = file_get_contents($cachefile);
         return json_decode($data, true);
     }
