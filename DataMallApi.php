@@ -59,11 +59,9 @@ class dmapi {
         $attrs = json_decode($data, true);
 
         if ($sort) {
-            function cmp($a, $b) {
-                return $a['ServiceNo'] - $b['ServiceNo'];
-            }
-
-            usort($attrs['Services'],"cmp");
+            usort($attrs['Services'], function($a, $b) {
+                return $a['ServiceNo'] > $b['ServiceNo'];
+            });
         }
 
         return $attrs;
