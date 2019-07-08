@@ -26,21 +26,15 @@ if (isset($_POST['bid'])) {
 
 
 function bus_arrival($dmapi, $bs) {
-$found = false;
-foreach ($dmapi->getBusStopAttrs()['value'] as $item) {
-    if ($item['BusStopCode'] == $bs) {
-        $found = true;
-        break;
-    }
-}
-if (!$found) {
+$bsattr = $dmapi->getBusStopAttrs($bs);
+if ($bsattr['BusStopCode'] != $bs) {
     echo('<div class="alert alert-danger"><strong>Error!</strong> Bus stop does not exist.</div>');
     return;
 }
 
 // Display the bus stop name in the header
 $tbl = '<center><table class="table table-striped" style="width:100%;margin:0px;"><thead><tr><th colspan=4 clasns="table-bordered" style="padding-bottom:10px;padding-top:10px;">';
-$tbl .= "<center><strong>" . $item['BusStopCode'] . ' – ' . $item['Description'] . " (" . $item['RoadName'] . ")</strong></center>";
+$tbl .= "<center><strong>" . $bsattr['BusStopCode'] . ' – ' . $bsattr['Description'] . " (" . $bsattr['RoadName'] . ")</strong></center>";
 $tbl .='</th></tr></thead><tbody>';
 echo $tbl;
 

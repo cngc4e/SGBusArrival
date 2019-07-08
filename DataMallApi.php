@@ -68,38 +68,63 @@ class dmapi {
     }
 
     /**
-    * Populate and update all bus stop attributes in cache
+    * Populate and update all bus stops attributes in cache
     */
     public function updateBusStopAttrs() {
-        $cachefile = __DIR__ . "/cache/bus_stops.json";
-        // Combine all the json files together
-            $response = $this->curl_query($this->query_url . "BusStops");
-            $stopsArr = json_decode($response, true);
+        $dbfile = __DIR__ . "/cache/busstops.db";
+        @unlink($dbfile . "-tmp");
+        $db = new SQLite3($dbfile . "-tmp");
 
-            while (1) {
-                $response = $this->curl_query($this->query_url . "BusStops?\$skip=" . count($stopsArr['value']));
-                print(count($stopsArr['value'])."<br>");
-                $addArr = json_decode($response, true)['value'];
-                if (count($addArr) <= 0) {
-                    break;
-                }
-                $stopsArr['value'] = array_merge($stopsArr['value'], $addArr);
+        $sz = 0;
+        print("<strong>Start populating db..</strong><br>");
+        while (1) {
+            $response = $this->curl_query($this->query_url . "BusStops?\$skip=" . $sz);
+            $valArr = json_decode($response, true)['value'];
+            if (count($valArr) <= 0) {
+                break;
+            }
+            $sz += count($valArr);
+
+            $time_start = microtime(true);
+
+            $values = array();
+            foreach ($valArr as $row) {
+                $db->exec("CREATE TABLE IF NOT EXISTS stops (BusStopCode TEXT, Description TEXT,
+                                                             Latitude REAL, Longitude REAL,
+                                                             RoadName TEXT)");
+                $row["Description"] = SQLite3::escapeString($row["Description"]);
+                $row["RoadName"] = SQLite3::escapeString($row["RoadName"]);
+                $values[] = "('{$row["BusStopCode"]}', '{$row["Description"]}',
+                        {$row["Latitude"]}, {$row["Longitude"]},
+                        '{$row["RoadName"]}')";
+            }
+            if (!$db->exec("INSERT INTO stops VALUES " . implode(", ", $values))) {
+                print("An error occurred while exec. Stopping...<br>");
+                break;
             }
 
-            $data = json_encode($stopsArr);
-            file_put_contents($cachefile, $data, LOCK_EX);
-            print("<strong>Done.<strong>");
+            $time_end = microtime(true);
+            $time_taken_secs = round($time_end - $time_start, 2);
+
+            print("Did total: " .$sz. "; Time elapsed:" .$time_taken_secs. " secs<br>");
+        }
+
+        rename($dbfile . "-tmp", $dbfile);
+
+        print("<strong>Done.</strong>");
     }
 
     /**
-    * Get all bus stop attributes from cache
+    * Get bus stop attributes
     *
+    * @param string $bid The bus stop number to query on
     * @return array
     */
-    public function getBusStopAttrs() {
-        $cachefile = __DIR__ . "/cache/bus_stops.json";
-        $data = file_get_contents($cachefile);
-        return json_decode($data, true);
+    public function getBusStopAttrs($bid) {
+        $dbfile = __DIR__ . "/cache/busstops.db";
+        $db = new SQLite3($dbfile);
+        $result = $db->query("SELECT * FROM stops WHERE BusStopCode IS '{$bid}'");
+        return $result->fetchArray(SQLITE3_ASSOC);
     }
 
     public function updateBusRouteAttrs() {
