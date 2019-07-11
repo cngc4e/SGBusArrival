@@ -60,7 +60,7 @@ class dmapi {
 
         if ($sort) {
             usort($attrs['Services'], function($a, $b) {
-                return $a['ServiceNo'] > $b['ServiceNo'];
+                return strnatcmp($a['ServiceNo'], $b['ServiceNo']);
             });
         }
 
